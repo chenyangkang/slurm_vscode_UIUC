@@ -1,4 +1,17 @@
-# slurm_jupyter
+# Modified instruction on how to run jupyter on slurm for UIUC illnois campus cluster (ICC)
+
+This repo is a note for how to setup jupyter notebook access on slurm and access with VSCode. Tested on UIUC illnois campus cluster (ICC).
+
+Most information is from [this repo](https://github.com/McWilliamsCenter/slurm_jupyter?tab=readme-ov-file) and this [web](https://code.visualstudio.com/docs/remote/ssh) and chatgpt 4o.
+
+We can't run jupyter on slurm login node, especially in system like UIUC ICC where the job will be killed after 30 CPU-minutes. So the solution is to submit batch job to run jupyter on the computation node, and remotely access it using VS code (my choice). You can also use the innate jupyter lab by copying the url given by the jupyter.
+
+
+
+## The following code is from the original author:
+
+
+## slurm_jupyter
 
 Below are my instructions for easy and fast implementation of jupyter notebooks on a SLURM cluster over SSH. These instructions are built for ready use on the Vera computing cluster (PSC-McWilliams Center), but can be generalized to any computing cluster that uses a recent version of SLURM.
 
@@ -90,5 +103,28 @@ Lastly, to close everything, you have to both stop the job running on the cluste
 * Like in __Jupyter on a login node__, you can also wrap the ssh command in a simple bash script. An example is presented in [vera_compute.sh](vera_compute.sh).
 * I've also included [jupyter_gpu.job](jupyter_gpu.job) to demonstrate how to extend this analysis to run on a GPU node (like twig on vera). 
 
-## Good luck!
-Feel free to reach out to me at <mho1@andrew.cmu.edu> if you have any questions.
+
+## One more thing
+
+The only thin I want to add on the notes of the original author is that, you should append this into you ~/.ssh/config
+
+```sh
+Host campuscluster-ccc0335
+  HostName cc-login.campuscluster.illinois.edu
+  User yc85
+  LocalForward 8888 ccc0335:8888
+```
+
+Replace yc85 as your NetID. `campuscluster-ccc0335` is a random name, just a sign. `ccc0335` is the actual computation node that your sbatch jupyter job is runing on.
+
+Then 
+
+1. connect using vscode:
+
+<img src="fig1.png" alt="" width="100"/>
+
+2. Select the `campuscluster-ccc0335`
+
+<img src="fig2.png" alt="" width="100"/>
+
+3. Type in login code. Finished! Now you can open an jupyter notebook or navigate to /scratch or /projects before that.
