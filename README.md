@@ -4,7 +4,7 @@ This repo is a note for how to setup jupyter notebook access on slurm and access
 
 Most information is from [this repo](https://github.com/McWilliamsCenter/slurm_jupyter?tab=readme-ov-file) and this [web](https://code.visualstudio.com/docs/remote/ssh) and chatgpt 4o.
 
-We can't run jupyter on slurm login node, especially in system like UIUC ICC where the job will be killed after 30 CPU-minutes. So the solution is to submit batch job to run jupyter on the computation node, and remotely access it using VS code (my choice). You can also use the innate jupyter lab by copying the url given by the jupyter.
+We can't run jupyter on slurm login node, especially in systems like UIUC ICC where the job will be killed after 30 CPU-minutes. So one solution is to submit a batch job to run jupyter on the computation node, and remotely access it using VS code. You can also use the innate jupyter lab by copying the url given by the jupyter.
 
 
 
