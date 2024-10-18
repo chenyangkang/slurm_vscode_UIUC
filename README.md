@@ -1,6 +1,6 @@
 # Modified instruction on how to run jupyter on slurm for UIUC illnois campus cluster (ICC)
 
-This repo is a note for how to setup jupyter notebook access on slurm and access with VSCode. Tested on UIUC illnois campus cluster (ICC).
+This repo is a note for how to setup jupyter notebook access on slurm and access with VSCode. Tested on UIUC Illnois Campus Cluster (ICC).
 
 Most information is from [this repo](https://github.com/McWilliamsCenter/slurm_jupyter?tab=readme-ov-file) and this [web](https://code.visualstudio.com/docs/remote/ssh) and chatgpt 4o.
 
