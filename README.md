@@ -106,7 +106,7 @@ Lastly, to close everything, you have to both stop the job running on the cluste
 
 ## One more thing
 
-The only thin I want to add on the notes of the original author is that, you should append this into you ~/.ssh/config
+One thing I want to add on the notes of the original author is that, you should append this into you ~/.ssh/config
 
 ```sh
 Host campuscluster-ccc0335
