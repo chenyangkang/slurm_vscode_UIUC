@@ -109,22 +109,19 @@ Lastly, to close everything, you have to both stop the job running on the cluste
 One thing I want to add on the notes of the original author is that, you should append this into you ~/.ssh/config
 
 ```sh
-Host campuscluster-ccc0335
+Host ICC
   HostName cc-login.campuscluster.illinois.edu
+  ForwardX11 yes
   User yc85
-  LocalForward 8888 ccc0335:8888
 ```
 
-Replace yc85 as your NetID. `campuscluster-ccc0335` is a random name, just a sign. `ccc0335` is the actual computation node that your sbatch jupyter job is runing on.
+Replace `yc85` with your NetID.
 
-Then 
+And I just realize the delta has its instruction on how to do it!
 
-1. connect using vscode:
+ICC is not delta but they work in the same way! https://docs.ncsa.illinois.edu/systems/delta/en/latest/user_guide/vscode/remote_jupyter.html
 
-<img src="fig1.png" alt="" width="200"/>
+![](./Fig3_.png)
+![](./Fig4_.png)
 
-2. Select the `campuscluster-ccc0335`
 
-<img src="fig2.png" alt="" width="400"/>
-
-3. Type in login code. Finished! Now you can open an jupyter notebook or navigate to /scratch or /projects before that.
