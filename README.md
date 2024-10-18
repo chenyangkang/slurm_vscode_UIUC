@@ -121,10 +121,10 @@ Then
 
 1. connect using vscode:
 
-<img src="fig1.png" alt="" width="100"/>
+<img src="fig1.png" alt="" width="200"/>
 
 2. Select the `campuscluster-ccc0335`
 
-<img src="fig2.png" alt="" width="100"/>
+<img src="fig2.png" alt="" width="400"/>
 
 3. Type in login code. Finished! Now you can open an jupyter notebook or navigate to /scratch or /projects before that.
