@@ -1,127 +1,110 @@
-# Modified instruction on how to run jupyter on slurm for UIUC illnois campus cluster (ICC)
+## A brief instruction on how to access compute node on slurm using VScode (to run apps, including jupyter notebook) at UIUC illnois campus cluster (ICC)
 
-This repo is a note for how to setup jupyter notebook access on slurm and access with VSCode. Tested on UIUC Illnois Campus Cluster (ICC).
+This repo is a note for how to setup compute node access on slurm and access with VSCode to run apps like jupyter notebook. Tested on UIUC Illnois Campus Cluster (ICC).
 
-Most information is from [this repo](https://github.com/McWilliamsCenter/slurm_jupyter?tab=readme-ov-file) and this [web](https://code.visualstudio.com/docs/remote/ssh) and chatgpt 4o.
+There are apparently many different way to access the jupyter notebook on slurm:
 
-We can't run jupyter on slurm login node, especially in systems like UIUC ICC where the job will be killed after 30 CPU-minutes. So one solution is to submit a batch job to run jupyter on the computation node, and remotely access it using VS code. You can also use the innate jupyter lab by copying the url given by the jupyter.
+1. run jupyter notebook on login node
+2. Run notebook on compute node (persistently), and access it each time.
+3. Each time ssh to the compute node, and start a jupyter server.
 
+We can't run jupyter on slurm login node, especially in systems like UIUC ICC where the job will be killed after 30 CPU-minutes. So we rule out the fist method.
 
+The following method will be based on running notebook on compute node, and this is only the one best way I figured among the others. This method is only tested on MAC OS.
 
-## The following code is from the original author:
+The most important reference is from: https://docs.chpc.wustl.edu/software/visual-studio-code.html.
 
+## 1. Generate SSH key pairs on your local machine
 
-## slurm_jupyter
+- 1.1 Open the terminal of your local machine, run `ssh-keygen`. Press enter for all default setting. A pair of keys will be generated as ~/.ssh/id_rsa (private key) and ~/.ssh/id_rsa.pub (public key). If you already have a key pairs, just use it and no need to regenerate.
 
-Below are my instructions for easy and fast implementation of jupyter notebooks on a SLURM cluster over SSH. These instructions are built for ready use on the Vera computing cluster (PSC-McWilliams Center), but can be generalized to any computing cluster that uses a recent version of SLURM.
-
-There are two ways to run a jupyter notebook on a remote SLURM cluster: on a login node or on a compute node. The compute node instance gives you full access to the cluster's computational resources, but is slightly more difficult to set up than the login node method. 
-
-Each method has its drawbacks: Heavy computation on a login node will clog up other users' access to the system, while the compute node method will waste resources when idle. You should use the login node method when doing simple, resource-light computation (e.g. data transfer/exploration, plot generation, etc.) and the compute node method for doing high memory or extended computation (e.g. model fitting, simulation, etc.). Please be conscientious of your use.
-
-## Jupyter on a login node
-### Setup
-1. Install [jupyter and its dependencies](https://jupyter.org/install) in your home directory. I would recommend doing this within a [Conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html) for better module control. Vera has a pre-installed anaconda3 module environment that you can load with `module load anaconda3`.
-2. Navigate to your account root directory `~` and generate a configuration file which dictates server settings. 
-    ```console
-    user@server:~$ jupyter notebook --generate-config
-    ```
-3. Generate a hashed password to secure your jupyter instances. The following command will prompt you to enter a password and will automatically write it to your configuration file.
-    ```console
-    user@server:~$ jupyter notebook password
-    ```
-4. Modify the configuration file located at `~/.jupyter/jupyter_notebook_config.py` and un-comment and change the following lines. You'll need to search through the config file to find each line.
-    ```python
-    c.NotebookApp.open_browser = False
-    c.NotebookApp.port = 8888 # (You can set this to any four-digit integer)
-    ```
-    Choose a 4-digit port number other than `8888` to avoid overlapping with another user's jupyter instance
-
-### Running
-From your local machine, run 
-```console
-user@local:~$ ssh -L <port>:localhost:<port> -t <user>@<server> "jupyter notebook"
-```
-
-where  `<port>` is the port you set earlier, `<user>` is your cluster user id, and `<server>` is the address of the login server. The `-L` flag tells ssh to tunnel the `localhost:<port>` of the remote server to that of your local machine. The `-t` flag opens up the connection as an interactive session, allowing you to pass `SIGINT` (Ctrl-C) to end the jupyter notebook before killing the ssh connection. To open your jupyter notebook within a specific conda environment (e.g. `<env>`), replace the command in quotations with `source activate <env>; jupyter notebook`.
-
-
-### Access
-You can now access the jupyter server as if it was running on your own localhost. In your browser, navigate to ```http://localhost:<port>```.
-
-### Exiting
-You can end the jupyter instance and the `ssh` bridge by either clicking 'Quit' in the Jupyter Dashboard or passing `SIGINT` (Ctrl-C) to the running terminal.
-
-### Notes
-Here are some miscellaneous notes on running on a login node:
- * If you run into a "bash: jupyter: command not found" error, you have to replace the `"jupyter notebook"` command with the location of the jupyter binary in the server directories. You can find it using `which jupyter`.
- * If you're comfortable with leaving jupyter running indefinitely in the background on your server, remove the -t flag and add the -f flag. This forks the process to the background. Just know that, in order to shut down the server, you'll need to find the process ID and kill it manually. [Here's a stack overflow with how to do this.](https://stackoverflow.com/questions/9447226/how-to-close-this-ssh-tunnel)
- * You can wrap the long `ssh` command inside a simple bash script so you don't have to type it up every time. I've included my example in this repo as [vera_login.sh](vera_login.sh). This is run with:
-    ```console
-    user@local:~$ sh vera_login.sh
-    ```
- * This procedure can be modified to run a [JupyterLab server](https://jupyterlab.readthedocs.io/en/stable/) instead of just Jupyter notebooks. To do so, simply replace `jupyter notebook` with `jupyter lab` in the above `ssh` command.
-
-## Jupyter on a compute node
-The below instructions will teach you how to submit a SLURM batch job to run an instance of jupyter on a compute node. Then, we will describe how to pipe signals from that compute node to your local machine to enable access through your local web  browser. The system configuration for vera is listed [here](https://github.com/pscedu/vera/blob/master/docs/index.md), including the available CPUs and memory of compute nodes.
-
-This procedure is built off of this tutorial: http://docs.ycrc.yale.edu/clusters-at-yale/guides/jupyter/ , which describes a general procedure for remote jupyter access in a SLURM scheduler. Since that resource describes much of the what/how/why of the procedure, I'll just give you the important stuff.
-
-### Setup
-1. Follow __Setup__ steps from __Jupyter on a login node__
-2. Copy [jupyter.job](jupyter.job) into your veera home directory `~`. This contains all the information necessary for the SLURM scheduler to run your jupyter instance.
-3. Change the output-error directory to a desired (junk) folder (lines 6 and 7 in [jupyter.job](jupyter.job)).  Here, Jupyter will dump text files containing all the typical stuff that would otherwise be printed to terminal.
-4. Change the desired `<port>` to the one chosen in the setup (line 11 in [jupyter.job](jupyter.job)).
-
-### Running
-1. From your home directory, run:
-    ```console
-    user@server:~$ sbatch jupyter.job
-    ```
-    This will submit your jupyter job to the cluster for execution. Assuming the cluster isn't too bogged down, your job should soon appear as RUNNING under your username.
-    ```console
-    user@server:~$ squeue
-    ```
-    Your job should be assigned a node, displayed in the `NODELIST` field (e.g. `compute-1-23`). The name of this node is necessary for the next step. I will refer to this as `<node>`.
-
-2. In your local terminal, run the following command 
-    ```console
-    user@server:~$ ssh -N -L <port>:<node>:<port> <user>@<server>
-    ```
-    This forms a continuously running 'bridge' between your terminal and the compute node running your jupyter notebook. 
-    
-### Access
-Finally, you should be able to access your jupyter server on a local web browser. In your browser, navigate to ```http://localhost:<port>```.
-
-### Exiting
-Lastly, to close everything, you have to both stop the job running on the cluster and also kill the bridge connecting you to the cluster. 
-* To stop the jupyter job, you can either click 'Quit' in the Jupyter Dashboard or `scancel` the `JOBID` of your jupyter process.
-* To close the ssh bridge, you can simply pass `SIGINT` (Ctrl-C) to the running bridge in your local terminal.
-
-### Notes
-* Feel free to play around with the requested resources in [jupyter.job](jupyter.job) (e.g. number of cpus, max runtime, etc.). 
-* Like in __Jupyter on a login node__, you can also wrap the ssh command in a simple bash script. An example is presented in [vera_compute.sh](vera_compute.sh).
-* I've also included [jupyter_gpu.job](jupyter_gpu.job) to demonstrate how to extend this analysis to run on a GPU node (like twig on vera). 
-
-
-## One more thing
-
-One thing I want to add on the notes of the original author is that, you should append this into you ~/.ssh/config
+- 1.2 Copy the public key to the login node of the cluster server. 
 
 ```sh
-Host ICC
-  HostName cc-login.campuscluster.illinois.edu
-  ForwardX11 yes
-  User yc85
+ssh-copy-id yc85@cc-login.campuscluster.illinois.edu
 ```
 
-Replace `yc85` with your NetID.
+where yc85 is your user name.
 
-And I just realize the delta has its instruction on how to do it!
+## 2. Setup VScode node:
 
-ICC is not delta but they work in the same way! https://docs.ncsa.illinois.edu/systems/delta/en/latest/user_guide/vscode/remote_jupyter.html
+- 2.1 VS Code has a little bit of trouble with Slurm's module system. Append the following to your ~/.bashrc on the cluster:
 
-![](./Fig3_.png)
-![](./Fig4_.png)
+```sh
+export MODULEPATH=$MODULEPATH:/opt/modulefiles
+```
+
+- 2.2 Modify ssh config file on your local machine:
+
+Add these to your `~/.ssh/config` file on your local machine
+
+```
+Host ICC-compute
+  Hostname 127.0.0.1 
+  User yc85
+  IdentityFile ~/.ssh/id_rsa
+  Port 8781
+
+```
+
+Port `8781` is not special, so you can change it. Don't change the `127.0.0.1`. The `~/.ssh/id_rsa` correspond to your private key.
 
 
+- 2.3 Configure the cluster for X11 forwarding
+
+![](./fig1.png)
+
+So do these on your cluster login node:
+
+```
+[clusteruser@login02 ~] echo "export XDG_RUNTIME_DIR=$HOME/.runtime-dir" >> ~/.bashrc
+[clusteruser@login02 ~] mkdir -p ~/.runtime-dir
+[clusteruser@login02 ~] chown $USER ~/.runtime-dir
+[clusteruser@login02 ~] chmod 700 ~/.runtime-dir
+```
+
+
+
+## 3. Login
+
+- 3.1 The first step of the login is to make a tunnel from your local machine, though the cluster login node, to the compute node.
+
+Open a terminal on your local machine, run:
+
+```sh
+ssh -L 8781:ccc0335:22 yc85@cc-login.campuscluster.illinois.edu
+```
+This setup forwards any connections made to localhost:8781 on your local machine to port 22 on the ccc0335 host (SSH port on the computation node).
+
+This should login to your login node on the cluster.
+
+- 3.2 Submit a srun job
+
+To allocate resources, submit a srun job:
+
+```sh
+srun -w ccc0335 --partition=aces --nodes=1 --time=29-00:00:00 --mem=50GB --cpus-per-task=5 --pty bash
+```
+
+For convenience, I made an alias of this command and add it to my `~/.bashrc` file:
+
+```sh
+get_compute_resources_ccc0335='srun -w ccc0335 --partition=aces --nodes=1 --time=29-00:00:00 --mem=50GB --cpus-per-task=5 --pty bash'
+```
+
+So that each time I only need to call `get_compute_resources_ccc0335`.
+
+Notice that 3.1 and 3.2 are consecutive, so you should be able to finish these two steps in the same terminal.
+
+If you close this terminal, then everything, including the tunnel and the srun job will be terminated. So you will keep it open throughout the coding today, shut down when you finish today's work (then everything automatically stop), and redo this tomorrow.
+
+- 3.3 Open your VScode, on the left lower corner you should have a link icon to click on, if you have the ssh extension installed. Click - connect to host - ICC-compute. This should open a new window of VScode for you. Open a vscode terminal inside this window. If it shows `(base) [yc85@ccc0335 ~]$ `, then you are on the compute node! Now you can do the things you want, like open a jupyter notebook.
+
+## 4. It's a new day
+
+It's a new day! To start working on vscode + slurm + jupyter, you:
+
+1. Open your local terminal, run `ssh -L 8781:ccc0335:22 yc85@cc-login.campuscluster.illinois.edu`
+2. You will login to the login node of cluster. Run `get_compute_resources_ccc0335`.
+3. Open your VScode, connet to host `ICC-compute`.
+4. Start working! 
