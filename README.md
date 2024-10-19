@@ -2,7 +2,7 @@
 
 This repo is a note for how to setup compute node access on slurm and access with VSCode to run apps like jupyter notebook. Tested on UIUC Illnois Campus Cluster (ICC).
 
-There are apparently many different way to access the jupyter notebook on slurm:
+There are apparently many different ways to access the jupyter notebook on slurm:
 
 1. run jupyter notebook on login node
 2. Run notebook on compute node (persistently), and access it each time.
