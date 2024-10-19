@@ -47,7 +47,7 @@ Host ICC-compute
 
 ```
 
-Port `8781` is not special, so you can change it. Don't change the `127.0.0.1`. The `~/.ssh/id_rsa` correspond to your private key.
+Port `8781` is not special, so you can change it. Don't change the `127.0.0.1`. The `~/.ssh/id_rsa` corresponds to your private key.
 
 
 - 2.3 Configure the cluster for X11 forwarding
