@@ -86,10 +86,10 @@ To allocate resources, submit a srun job:
 srun -w ccc0335 --partition=aces --nodes=1 --time=29-00:00:00 --mem=50GB --cpus-per-task=5 --pty bash
 ```
 
-For convenience, I made an alias of this command and add it to my `~/.bashrc` file:
+For convenience, I made an alias of this command and add it to my `~/.bashrc` file on the login node:
 
 ```sh
-get_compute_resources_ccc0335='srun -w ccc0335 --partition=aces --nodes=1 --time=29-00:00:00 --mem=50GB --cpus-per-task=5 --pty bash'
+alias get_compute_resources_ccc0335='srun -w ccc0335 --partition=aces --nodes=1 --time=29-00:00:00 --mem=50GB --cpus-per-task=5 --pty bash'
 ```
 
 So that each time I only need to call `get_compute_resources_ccc0335`.
