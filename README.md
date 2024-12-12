@@ -100,7 +100,19 @@ If you close this terminal, then everything, including the tunnel and the srun j
 
 - 3.3 Open your VScode, on the left lower corner you should have a link icon to click on, if you have the ssh extension installed. Click - connect to host - ICC-compute. This should open a new window of VScode for you. Open a vscode terminal inside this window. If it shows `(base) [yc85@ccc0335 ~]$ `, then you are on the compute node! Now you can do the things you want, like open a jupyter notebook.
 
-- 3.4 Other tips
+
+## 4. It's a new day
+
+It's a new day! To start working on vscode + slurm + jupyter, you:
+
+1. Open your local terminal, run `ssh -L 8781:ccc0335:22 yc85@cc-login.campuscluster.illinois.edu`
+2. You will login to the login node of cluster. Run `get_compute_resources_ccc0335`.
+3. Open your VScode, connet to host `ICC-compute`.
+4. Start working!
+
+-------
+
+- Other tips
 Becuase certain nodes are not always available, we can use a two-step method to let slurm decide which node is available, then mannually query the resources of that node.
 
 Some useful lines to add to the ~/.bashrc:
@@ -124,11 +136,3 @@ test_ic() {
 So run test_ic() first, see which node is available. Then close the terminal and open a new one. Then `ssh -L 8781:THE_AVAILABLE_NODE:22 yc85@cc-login.campuscluster.illinois.edu`, then `get_ic THE_AVAILABLE_NODE`.
 
 
-## 4. It's a new day
-
-It's a new day! To start working on vscode + slurm + jupyter, you:
-
-1. Open your local terminal, run `ssh -L 8781:ccc0335:22 yc85@cc-login.campuscluster.illinois.edu`
-2. You will login to the login node of cluster. Run `get_compute_resources_ccc0335`.
-3. Open your VScode, connet to host `ICC-compute`.
-4. Start working! 
