@@ -1,5 +1,92 @@
 ## A brief instruction on how to access compute node on slurm using VScode (to run apps, including jupyter notebook) at UIUC illnois campus cluster (ICC)
 
+Update on Feb 9, 2025:
+
+The Campus Cluster team has updated the system which makes all the previous method invalid. I spend a lot of time figuring out how to connect to the compute node with my local VScode but failed. So I decided to use the `code-server` that runs on the compute node, and connect it with browser.
+
+1. Add this to you local `~/.ssh/config` file:
+
+```bash
+Host ICC-login
+  User yc85
+  Hostname cc-login.campuscluster.illinois.edu
+  ServerAliveInterval 30
+  ServerAliveCountMax 1200
+  ControlMaster auto
+  ControlPersist 3600
+  ControlPath ~/.ssh/%r@klone-login:%p
+```
+
+where yc85 should be your user name.
+
+
+2. Generate Private-public keys pair if you haven't, and copy the public key to the cloud.
+3. In terminal: `ssh ICC-login`, duo login.
+4. On login node, Install `code-server`: `micromamba install code-server`. You can also use conda: `conda install code-server`.
+5. On login node, make a file with name `code-server_no_password.sh`:
+
+```bash
+#!/bin/bash 
+ 
+#SBATCH --job-name=vscode
+#SBATCH --output=%x_%j_%N.log 
+#SBATCH --time 00-12:00:00
+#SBATCH --cpus-per-task 2
+#SBATCH --mem 16G
+#SBATCH --partition IllinoisComputes
+ 
+source ~/.bashrc
+
+micromamba activate base
+
+
+# PORT=$(python -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
+PORT=7077
+
+echo "********************************************************************" 
+echo "Starting code-server in Slurm"
+echo "Environment information:" 
+echo "Date:" $(date)
+echo "Allocated node:" $(hostname)
+echo "Node IP:" $(ip a | grep 128.146)
+echo "Path:" $(pwd)
+echo "Password to access VSCode:" $PASSWORD
+echo "Listening on:" $PORT
+echo "********************************************************************"
+echo "to port forward connection:"
+echo "ssh -t -t $(whoami)@cc-login.campuscluster.illinois.edu -L 7077:localhost:7077 ssh $(basename $(hostname) .campuscluster.illinois.edu) -L 7077:localhost:$PORT"
+echo "http://127.0.0.1:7077"
+echo "********************************************************************" 
+echo "using jump: "
+echo "ssh -t -t $(whoami)@cc-login.campuscluster.illinois.edu -J jump -L 7077:localhost:7077 ssh $(hostname) -L 7077:localhost:$PORT"
+echo "********************************************************************"
+echo "////////////////////"
+echo "scancel $SLURM_JOB_ID "
+echo "////////////////////"
+echo "********************************************************************" 
+
+code-server --bind-addr 127.0.0.1:$PORT --auth none --disable-telemetry
+```
+
+Notice that proxy jump seems to be forbidden on the new Campus Cluster system some how. So use port forward.
+
+5. `sbatch code-server_no_password.sh`
+6. Find out wich node this script is running on (assume it's node ccc0365).
+7. Open a new terminal on you local machine, make a tunnel:
+   
+```bash
+ssh -t -t  yc85@cc-login.campuscluster.illinois.edu -L 7077:localhost:7077 ssh ccc0365 -L 7077:127.0.0.1:7077
+```
+
+This will tunnel your local computer to the compute node ccc0365.
+
+8. Open your local browser, connect to `http://127.0.0.1:7077/`
+
+
+-- Happy coding --
+
+------
+
 This repo is a note for how to setup compute node access on slurm and access with VSCode to run apps like jupyter notebook. Tested on UIUC Illnois Campus Cluster (ICC).
 
 There are apparently many different ways to access the jupyter notebook on slurm:
