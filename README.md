@@ -82,8 +82,23 @@ This will tunnel your local computer to the compute node ccc0365.
 
 8. Open your local browser, connect to `http://127.0.0.1:7077/`
 
+9. Add shortcut to `~/.zshrc` / `~/.bashrc`:
+```bash
+get_icc() {
+    ssh -t -t yc85@cc-login.campuscluster.illinois.edu -L 7072:localhost:7071 ssh "$(ssh ICC-login "jobid=\$(sbatch code-server_no_password.sh | awk '{print \$NF}'); while true; do state=\$(squeue -j \$jobid -o '%T' --noheader); if [[ \$state == 'RUNNING' ]]; then squeue -j \$jobid -o '%N' --noheader; break; fi; sleep 5; done")" -L 7071:localhost:7054
+}
+```
+
+Where 
+
+1) ssh `ICC-login "..."` is to first ssh then excecute the code in quote.
+2) `jobid=\$(sbatch code-server_no_password.sh | awk '{print \$NF}'); while true; do state=\$(squeue -j \$jobid -o '%T' --noheader); if [[ \$state == 'RUNNING' ]]; then squeue -j \$jobid -o '%N' --noheader; break; fi; sleep 5; done")` is to submit the code-server job and get the node name.
+3) `ssh -t -t yc85@cc-login.campuscluster.illinois.edu -L 7072:localhost:7071 ssh $NODE_NAME -L 7071:localhost:7054` is finally making the tunnel.
+
 
 -- Happy coding --
+
+**The followings are deprecated for Illinois Campus Cluster:** 
 
 ------
 
