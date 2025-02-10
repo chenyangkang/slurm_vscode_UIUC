@@ -2,7 +2,7 @@
 
 Update on Feb 9, 2025:
 
-The Campus Cluster team has updated the system which makes all the previous method invalid. I spend a lot of time figuring out how to connect to the compute node with my local VScode but failed. So I decided to use the `code-server` that runs on the compute node, and connect it with browser.
+The Campus Cluster team has updated the system which makes all the previous method invalid. I spent a lot of time figuring out how to connect to the compute node with my local VScode but failed. So I decided to use the `code-server` that runs on the compute node, and connect it with browser.
 
 1. Add this to you local `~/.ssh/config` file:
 
